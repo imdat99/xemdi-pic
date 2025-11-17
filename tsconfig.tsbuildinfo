@@ -1,0 +1,1 @@
+{"root":["./src/app.vue","./src/root.vue","./src/main.ts","./src/serialize.ts","./src/server.entry.ts","./src/types.ts","./src/components/helloworld.vue","./src/components/ui/button/button.vue","./src/components/ui/button/index.ts","./src/lib/utils.ts","./vite.config.ts"],"errors":true,"version":"5.9.3"}
