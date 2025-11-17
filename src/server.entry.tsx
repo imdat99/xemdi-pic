@@ -11,6 +11,7 @@ import App from './App.vue';
 import Root from './Root.vue';
 import { streamText } from 'hono/streaming';
 import { PassThrough } from 'stream';
+import { createApp } from './app';
 type SessionDataTypes = {
   'counter': number
 }
@@ -28,16 +29,18 @@ app.use(cors(), async (c, next) => {
   // c.set("acmCampaignClient", acmCampaignClient);
   await next();
 }, contextStorage());
-
+const { app: vueApp, router } = await createApp();
 app.use(serveStatic({ root: './public' }))
 // app.use(i18nHonoMiddleware, renderer)
 app.get('*', async (c) => {
-  const url = c.req.url;
+  const url = new URL(c.req.url);
   console.log("Request URL:", url);
+  await router.push(url);
+  await router.isReady();
   return streamText(c, async (stream) => {
     c.header("Content-Type", "text/html; charset=UTF-8")
     c.header("Content-Encoding", "Identity")
-	const appStream = renderToWebStream(createSSRApp(Root));
+	const appStream = renderToWebStream(vueApp);
     await stream.write("<!DOCTYPE html>");
 	if(import.meta.env.DEV) {
 		const decoder = new TextDecoder(); // tạo decoder 1 lần
@@ -45,8 +48,7 @@ app.get('*', async (c) => {
 			transform(chunk, controller) {
         	// decode liên tục (streaming)
 				const text = decoder.decode(chunk, { stream: true });
-				const modifiedText = text.replace(/<\/head>/g, `<script type="module" src="/@vite/client"></script>
-    <script type="module" src="/src/main.ts"></script></head>`);
+				const modifiedText = text.replace(/<\/head>/g, `<script type="module" src="/@vite/client"></script><script type="module" src="/src/main.ts"></script></head>`);
 				controller.enqueue(new TextEncoder().encode(modifiedText));
 			},
 		})));

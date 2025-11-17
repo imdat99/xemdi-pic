@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import App from './App.vue';
-
-</script>
-
 <template>
     <html lang="en">
 
@@ -14,7 +9,7 @@ import App from './App.vue';
     </head>
 
     <body>
-        <App/>
+        <router-view/>
     </body>
 
     </html>
