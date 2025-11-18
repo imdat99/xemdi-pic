@@ -17,7 +17,7 @@ export default defineConfig((env) => ({
     unocss(),
     vitePluginLogger(),
     vitePluginSsrMiddleware({
-      entry: "src/server.entry.tsx",
+      entry: "src/server.entry.ts",
       preview: path.resolve("dist/server/index.js"),
     }),
 	{

@@ -1,11 +1,10 @@
+import { type ReactiveHead, type ResolvableValue } from "@unhead/vue";
 import {
+  createMemoryHistory,
   createRouter,
   createWebHistory,
   type RouteRecordRaw,
-  RouterView,
-  createMemoryHistory,
 } from "vue-router";
-import { useHead, type ReactiveHead, type ResolvableValue } from "@unhead/vue";
 
 type RouteData = RouteRecordRaw & {
   meta?: ResolvableValue<ReactiveHead>;
@@ -14,7 +13,7 @@ type RouteData = RouteRecordRaw & {
 const routes: RouteData[] = [
   {
     path: "/",
-    component: import.meta.env.SSR ? () => import("./Root.vue") : RouterView,
+    component: () => import("./components/Root"),
     meta: {
       title: "AnyWeb - support login with google, facebook, github",
       meta: [
@@ -22,7 +21,18 @@ const routes: RouteData[] = [
           name: "description",
           content: "AnyWeb - support login with google, facebook, github",
         },
+        // `<script type="module" src="/@vite/client"></script><script type="module" src="/src/client.entry.ts"></script>`
       ],
+      script: [
+        {
+          type: "module",
+          src: "/@vite/client",
+        },
+        {
+          type: "module",
+          src: "/src/client.entry.ts",
+        },
+      ]
     },
     children: [
       {
@@ -38,15 +48,15 @@ const routes: RouteData[] = [
         },
         // redirect: { name: "overview" },
         component: () => import("./App.vue"),
-        // meta: {
-        //     title: "Dashboard - AnyWeb",
-        //     meta: [
-        //         {
-        //             name: "description",
-        //             content: "Dashboard - AnyWeb - support login with google, facebook, github"
-        //         }
-        //     ]
-        // },
+        meta: {
+            title: "Dashboard - AnyWeb",
+            meta: [
+                {
+                    name: "description",
+                    content: "Dashboard - AnyWeb - support login with google, facebook, github"
+                }
+            ]
+        },
       },
       {
         path: "/:pathMatch(.*)*",
@@ -70,10 +80,5 @@ const router = createRouter({
     ? createMemoryHistory() // server
     : createWebHistory(), // client
   routes,
-});
-router.afterEach((to) => {
-  //   const { t } = i18n
-  console.log("to", to);
-  useHead(to.meta);
 });
 export default router;
