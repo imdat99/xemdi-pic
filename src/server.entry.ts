@@ -36,6 +36,8 @@ app.get("*", async (c) => {
   const { app: vueApp, router } = createApp(head);
   await router.push(url);
   await router.isReady();
+  const matched = router.resolve(url).matched;
+  // console.log(router.getMatchedComponents())
   return streamText(c, async (stream) => {
     c.header("Content-Type", "text/html; charset=UTF-8");
     c.header("Content-Encoding", "Identity");
