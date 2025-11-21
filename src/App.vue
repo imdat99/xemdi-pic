@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import HelloWorld from './components/HelloWorld.vue'
-const route = useRoute()
+import useSWRV from './lib/swr';
 
 // Lấy dữ liệu
-const fetchedData = route?.meta.fetchedData
+            const {data} = useSWRV('https://jsonplaceholder.typicode.com/todos/1');
 </script>
 
 <template>
@@ -12,7 +12,7 @@ const fetchedData = route?.meta.fetchedData
     <a href="https://vite.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />
     </a>
-    <pre>{{ fetchedData }}</pre>
+    <pre>{{ data }}</pre>
     <a href="https://vuejs.org/" target="_blank">
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>

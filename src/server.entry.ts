@@ -7,6 +7,7 @@ import { cors } from "hono/cors";
 import { streamText } from "hono/streaming";
 import { renderToWebStream } from "vue/server-renderer";
 import { createApp } from "./main";
+import { getCurrentInstance } from "vue";
 type SessionDataTypes = {
   counter: number;
 };
@@ -34,8 +35,10 @@ app.get("*", async (c) => {
   const url = new URL(c.req.url);
   const head = createHead();
   const { app: vueApp, router } = createApp(head);
+  
   await router.push(url);
   await router.isReady();
+  
   const matched = router.resolve(url).matched;
   // console.log(router.getMatchedComponents())
   return streamText(c, async (stream) => {
@@ -49,6 +52,7 @@ app.get("*", async (c) => {
     await stream.pipe(appStream);
     await stream.write(`<script>window.__SSR_STATE__ = "__STATE__";</script>`);
     await stream.write("</body></html>");
+    console.log("ctx", ctx)
   });
 });
 console.log("app running");

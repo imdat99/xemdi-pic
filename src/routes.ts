@@ -38,14 +38,6 @@ const routes: RouteData[] = [
       {
         path: "",
         name: "Dashboard",
-        beforeEnter: (to, from, next) => {
-          fetch("https://jsonplaceholder.typicode.com/todos/1")
-            .then((response) => response.json())
-            .then((json) => {
-              to.meta.fetchedData = json;
-              next();
-            });
-        },
         // redirect: { name: "overview" },
         component: () => import("./App.vue"),
         meta: {
