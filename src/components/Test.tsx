@@ -1,7 +1,7 @@
 import useSWRV from "@/lib/swr";
 import { defineComponent } from "vue";
 
-const test = defineComponent((props, ctx) => {
+const test = defineComponent((props, _ctx) => {
   console.log("props", props)
   const { data } = useSWRV(
     "https://jsonplaceholder.typicode.com/todos/" + props.jobId

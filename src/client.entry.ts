@@ -1,9 +1,9 @@
 // import vi_VN from '@lethdat/semi-ui-vue/dist/locale/source/vi_VN'
-import 'uno.css';
 // import { appComponents } from './components'
 import { createApp } from './main';
 // const router from './router'
 import { createHead } from '@unhead/vue/client'
+import 'uno.css';
 const head = createHead()
 async function render() {
     

@@ -7,6 +7,7 @@ import { cors } from "hono/cors";
 import { streamText } from "hono/streaming";
 import { renderToWebStream } from "vue/server-renderer";
 import { createApp } from "./main";
+import { bootstrapModules } from "virtual:ssr-assets";
 // import { renderer } from './renderer'
 const app = new Hono<HonoVarTypes>();
 // const client = new RedisClient("redis://");
@@ -31,10 +32,8 @@ app.get("*", async (c) => {
 	const url = new URL(c.req.url);
 	const head = createHead();
 	const { app: vueApp, router } = createApp(head);
-
-	await router.push(url);
+	await router.push(url.pathname);
 	await router.isReady();
-
 	// console.log(router.getMatchedComponents())
 	return streamText(c, async (stream) => {
 		c.header("Content-Type", "text/html; charset=UTF-8");
@@ -42,7 +41,9 @@ app.get("*", async (c) => {
 		const ctx = {};
 		const appStream = renderToWebStream(vueApp, ctx);
 		await stream.write("<!DOCTYPE html><html lang='en'><head>");
+		await stream.write("<base href='" + url.origin + "'/>");
 		await renderSSRHead(head).then((headString) => stream.write(headString.headTags.replace(/\n/g, "")));
+		await stream.write(buildBootstrapScript());
 		await stream.write("</head><body>");
 		await stream.pipe(appStream);
 		let json = htmlEscape(JSON.stringify(JSON.stringify(ctx)));
@@ -70,4 +71,27 @@ const ESCAPE_REGEX = /[&><\u2028\u2029]/g;
 
 function htmlEscape(str: string): string {
 	return str.replace(ESCAPE_REGEX, (match) => ESCAPE_LOOKUP[match]);
+}
+/**
+ * buildBootstrapScript, if isEntry is true, build script and link tags for bootstrap else is preload tags
+ * @param chunks vite manifest chunks
+ * @returns bootstrap script string <script>...</script>, <link>...</link> tags, preloaded as needed
+ */
+function buildBootstrapScript() {
+	let script = "";
+	let styles = "";
+	bootstrapModules.forEach((chunk) => {
+		if (chunk.isEntry) {
+			script += `<script type="module" src="${chunk.file}"></script>`;
+			(chunk.css || []).forEach((cssFile) => {
+				styles += `<link rel="stylesheet" href="${cssFile}">`;
+			});
+		} else {
+			script += `<link rel="modulepreload" href="${chunk.file}">`;
+			(chunk.css || []).forEach((cssFile) => {
+				styles += `<link rel="preload" as="style" href="${cssFile}">`;
+			});
+		}
+	});
+	return styles+script;
 }

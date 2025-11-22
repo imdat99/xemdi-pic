@@ -1,6 +1,7 @@
 import type { Connect, Plugin } from "vite";
 import { name as packageName } from "../package.json";
 import { createMiddleware } from "@hattip/adapter-node";
+import { pathToFileURL } from "url";
 
 
 export function vitePluginSsrMiddleware({
@@ -68,7 +69,7 @@ export function vitePluginSsrMiddleware({
 
     async configurePreviewServer(server) {
       if (preview) {
-        const mod = await import(preview);
+        const mod = await import( pathToFileURL(preview).href);
         return () => server.middlewares.use(mod.default);
       }
       return;

@@ -4,7 +4,7 @@ import { type Plugin, parseAstAsync } from "vite";
 export async function transformClientReference(input: string, id: string) {
 	const ast = await parseAstAsync(input);
 	const { output } = await transformWrapExport(input, ast, {
-		runtime: (v, n, meta) => `$$wrap(${v}, ${JSON.stringify(id)}, ${JSON.stringify(n)})`,
+		runtime: (v, n, _meta) => `$$wrap(${v}, ${JSON.stringify(id)}, ${JSON.stringify(n)})`,
 		ignoreExportAllDeclaration: true,
 	});
 	output.prepend(`\

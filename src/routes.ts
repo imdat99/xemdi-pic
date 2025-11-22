@@ -23,16 +23,6 @@ const routes: RouteData[] = [
         },
         // `<script type="module" src="/@vite/client"></script><script type="module" src="/src/client.entry.ts"></script>`
       ],
-      script: [
-        {
-          type: "module",
-          src: "/@vite/client",
-        },
-        {
-          type: "module",
-          src: "/src/client.entry.ts",
-        },
-      ]
     },
     children: [
       {
