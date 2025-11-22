@@ -180,7 +180,6 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 		!IS_SERVER &&
 		window !== undefined && (window as any).__SSR_STATE__.swrv)
 	// #endregion
-	console.log("IS_SERVER 185", isSsrHydration)
 	if (args.length >= 1) {
 		key = args[0]
 	}
@@ -203,19 +202,16 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 	}
 
 	let stateRef: StateRef<Data, Error> | null = null
-	console.log("isSsrHydration: ", isSsrHydration)
 	// #region ssr
 	if (isSsrHydration) {
 		// component was ssrHydrated, so make the ssr reactive as the initial data
-		console.log("vm", vm.$.type)
+		
 		const swrvState = (window as any).__SSR_STATE__.swrv || []
-		const swrvKey = +(window as any).__SSR_STATE__.swrvKey
-		console.log(keyRef)
+		const swrvKey = nanoHex(vm.$.type.__name??vm.$.type.name)
 		if (swrvKey !== undefined && swrvKey !== null) {
 			const nodeState = swrvState[swrvKey] || []
 			const instanceState = nodeState[isRef(keyRef) ? keyRef.value : keyRef()]
 
-			console.log("instanceState", instanceState)
 			if (instanceState) {
 				stateRef = reactive(instanceState)
 				isHydrated = true
@@ -365,12 +361,12 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 	if (IS_SERVER) {
 		const ssrContext = useSSRContext()
 		// make sure srwv exists in ssrContext
-		let swrvRes: any[] = []
+		let swrvRes: Record<string, any> = {}
 		if (ssrContext) {
 			swrvRes = ssrContext.swrv = ssrContext.swrv || swrvRes
 		}
 
-		const ssrKey = swrvRes.length
+		const ssrKey = nanoHex(vm.$.type.__name??vm.$.type.name)
 		// if (!vm.$vnode || (vm.$node && !vm.$node.data)) {
 		//   vm.$vnode = {
 		//     data: { attrs: { 'data-swrv-key': ssrKey } }
@@ -379,7 +375,6 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 
 		// const attrs = (vm.$vnode.data.attrs = vm.$vnode.data.attrs || {})
 		// attrs['data-swrv-key'] = ssrKey
-		console.log("vm.$attrs", nanoHex(vm.$.type.__name))
 		// // Nuxt compatibility
 		// if (vm.$ssrContext && vm.$ssrContext.nuxt) {
 		//   vm.$ssrContext.nuxt.swrv = swrvRes
@@ -438,15 +433,27 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 function isPromise<T>(p: any): p is Promise<T> {
 	return p !== null && typeof p === 'object' && typeof p.then === 'function'
 }
+
+/**
+ * string to hex 8 chars
+ * @param name string
+ * @returns string
+ */
 function nanoHex(name: string): string {
 	try {
-	let hex = ''
-	for (let i = 0; i < name.length; i++) {
-		hex += name.charCodeAt(i).toString(16)
-	}
+		let hash = 0
+		for (let i = 0; i < name.length; i++) {
+			const chr = name.charCodeAt(i)
+			hash = ((hash << 5) - hash) + chr
+			hash |= 0 // Convert to 32bit integer
+		}
+		let hex = (hash >>> 0).toString(16)
+		while (hex.length < 8) {
+			hex = '0' + hex
+		}
 	return hex
 	} catch {
-		console.log("err name: ", name)
+		console.error("err name: ", name)
 		return '0000'
 	}
 }
