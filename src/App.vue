@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue';
+import Test from './components/Test';
 import useSWRV from './lib/swr';
 
 // Lấy dữ liệu
@@ -18,5 +19,8 @@ const { data: data2 } = useSWRV('https://jsonplaceholder.typicode.com/todos/2');
 			<img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
 		</a>
 	</div>
-	<HelloWorld msg="Vite + Vue" />
+	<HelloWorld msg="Vite + Vue" id="4" />
+	<HelloWorld msg="Vite + Vue" id="5" />
+	<HelloWorld msg="Vite + Vue" id="6" />
+	<Test jobId="10" />
 </template>

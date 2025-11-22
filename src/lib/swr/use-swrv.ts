@@ -207,6 +207,7 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 	// #region ssr
 	if (isSsrHydration) {
 		// component was ssrHydrated, so make the ssr reactive as the initial data
+		console.log("vm", vm.$.type)
 		const swrvState = (window as any).__SSR_STATE__.swrv || []
 		const swrvKey = +(window as any).__SSR_STATE__.swrvKey
 		console.log(keyRef)
@@ -378,7 +379,7 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 
 		// const attrs = (vm.$vnode.data.attrs = vm.$vnode.data.attrs || {})
 		// attrs['data-swrv-key'] = ssrKey
-
+		console.log("vm.$attrs", nanoHex(vm.$.type.__name))
 		// // Nuxt compatibility
 		// if (vm.$ssrContext && vm.$ssrContext.nuxt) {
 		//   vm.$ssrContext.nuxt.swrv = swrvRes
@@ -436,6 +437,18 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 
 function isPromise<T>(p: any): p is Promise<T> {
 	return p !== null && typeof p === 'object' && typeof p.then === 'function'
+}
+function nanoHex(name: string): string {
+	try {
+	let hex = ''
+	for (let i = 0; i < name.length; i++) {
+		hex += name.charCodeAt(i).toString(16)
+	}
+	return hex
+	} catch {
+		console.log("err name: ", name)
+		return '0000'
+	}
 }
 
 export { mutate }

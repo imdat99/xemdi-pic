@@ -48,7 +48,7 @@ app.get("*", async (c) => {
 		let json = htmlEscape(JSON.stringify(JSON.stringify(ctx)));
 		await stream.write(`<script>window.__SSR_STATE__ = JSON.parse(${json});</script>`);
 		await stream.write("</body></html>");
-		console.log("ctx", ctx)
+		// console.log("ctx", ctx)
 	});
 });
 console.log("app running");

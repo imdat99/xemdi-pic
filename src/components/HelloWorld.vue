@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import Button from './ui/button/Button.vue';
 import useSWRV from '@/lib/swr';
 
-defineProps<{ msg: string }>()
-const { data } = useSWRV('https://jsonplaceholder.typicode.com/todos/3');
+const props = defineProps<{ msg: string, id: string }>()
+const { data } = useSWRV('https://jsonplaceholder.typicode.com/todos/'+props.id);
 
 const count = ref(0)
 </script>
