@@ -7,10 +7,6 @@ import { cors } from "hono/cors";
 import { streamText } from "hono/streaming";
 import { renderToWebStream } from "vue/server-renderer";
 import { createApp } from "./main";
-import { getCurrentInstance } from "vue";
-type SessionDataTypes = {
-  counter: number;
-};
 // import { renderer } from './renderer'
 const app = new Hono<HonoVarTypes>();
 // const client = new RedisClient("redis://");
@@ -20,40 +16,40 @@ const app = new Hono<HonoVarTypes>();
 //   console.error("Failed to connect to Redis", err);
 // });
 app.use(
-  cors(),
-  async (c, next) => {
-    c.set("fetch", app.request.bind(app));
-    //   c.set("redis", client);
-    // c.set("acmCampaignClient", acmCampaignClient);
-    await next();
-  },
-  contextStorage()
+	cors(),
+	async (c, next) => {
+		c.set("fetch", app.request.bind(app));
+		//   c.set("redis", client);
+		// c.set("acmCampaignClient", acmCampaignClient);
+		await next();
+	},
+	contextStorage()
 );
 app.use(serveStatic({ root: "./public" }));
 // app.use(i18nHonoMiddleware, renderer)
 app.get("*", async (c) => {
-  const url = new URL(c.req.url);
-  const head = createHead();
-  const { app: vueApp, router } = createApp(head);
-  
-  await router.push(url);
-  await router.isReady();
-  
-  const matched = router.resolve(url).matched;
-  // console.log(router.getMatchedComponents())
-  return streamText(c, async (stream) => {
-    c.header("Content-Type", "text/html; charset=UTF-8");
-    c.header("Content-Encoding", "Identity");
-    const ctx = {};
-    const appStream = renderToWebStream(vueApp, ctx);
-    await stream.write("<!DOCTYPE html><html lang='en'><head>");
-    await renderSSRHead(head).then((headString) => stream.write(headString.headTags.replace(/\n/g, "")));
-    await stream.write("</head><body>");
-    await stream.pipe(appStream);
-    await stream.write(`<script>window.__SSR_STATE__ = "__STATE__";</script>`);
-    await stream.write("</body></html>");
-    console.log("ctx", ctx)
-  });
+	const url = new URL(c.req.url);
+	const head = createHead();
+	const { app: vueApp, router } = createApp(head);
+
+	await router.push(url);
+	await router.isReady();
+
+	// console.log(router.getMatchedComponents())
+	return streamText(c, async (stream) => {
+		c.header("Content-Type", "text/html; charset=UTF-8");
+		c.header("Content-Encoding", "Identity");
+		const ctx = {};
+		const appStream = renderToWebStream(vueApp, ctx);
+		await stream.write("<!DOCTYPE html><html lang='en'><head>");
+		await renderSSRHead(head).then((headString) => stream.write(headString.headTags.replace(/\n/g, "")));
+		await stream.write("</head><body>");
+		await stream.pipe(appStream);
+		let json = htmlEscape(JSON.stringify(JSON.stringify(ctx)));
+		await stream.write(`<script>window.__SSR_STATE__ = JSON.parse(${json});</script>`);
+		await stream.write("</body></html>");
+		console.log("ctx", ctx)
+	});
 });
 console.log("app running");
 // app.get('/', (c) => {
@@ -61,3 +57,17 @@ console.log("app running");
 // })
 
 export default app;
+
+const ESCAPE_LOOKUP: { [match: string]: string } = {
+	"&": "\\u0026",
+	">": "\\u003e",
+	"<": "\\u003c",
+	"\u2028": "\\u2028",
+	"\u2029": "\\u2029",
+};
+
+const ESCAPE_REGEX = /[&><\u2028\u2029]/g;
+
+function htmlEscape(str: string): string {
+	return str.replace(ESCAPE_REGEX, (match) => ESCAPE_LOOKUP[match]);
+}
