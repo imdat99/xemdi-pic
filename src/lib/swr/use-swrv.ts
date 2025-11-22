@@ -205,12 +205,12 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 	// #region ssr
 	if (isSsrHydration) {
 		// component was ssrHydrated, so make the ssr reactive as the initial data
-		
+
 		const swrvState = (window as any).__SSR_STATE__.swrv || []
-		const swrvKey = nanoHex(vm.$.type.__name??vm.$.type.name)
+		const swrvKey = nanoHex(vm.$.type.__name ?? vm.$.type.name)
 		if (swrvKey !== undefined && swrvKey !== null) {
 			const nodeState = swrvState[swrvKey] || []
-			const instanceState = nodeState[isRef(keyRef) ? keyRef.value : keyRef()]
+			const instanceState = nodeState[nanoHex(isRef(keyRef) ? keyRef.value : keyRef())]
 
 			if (instanceState) {
 				stateRef = reactive(instanceState)
@@ -366,7 +366,7 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 			swrvRes = ssrContext.swrv = ssrContext.swrv || swrvRes
 		}
 
-		const ssrKey = nanoHex(vm.$.type.__name??vm.$.type.name)
+		const ssrKey = nanoHex(vm.$.type.__name ?? vm.$.type.name)
 		// if (!vm.$vnode || (vm.$node && !vm.$node.data)) {
 		//   vm.$vnode = {
 		//     data: { attrs: { 'data-swrv-key': ssrKey } }
@@ -381,13 +381,12 @@ function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error
 		// }
 		if (ssrContext) {
 			ssrContext.swrv = swrvRes
-			ssrContext.swrvKey = ssrKey
 		}
 		onServerPrefetch(async () => {
 			await revalidate()
 			if (!swrvRes[ssrKey]) swrvRes[ssrKey] = {}
 
-			swrvRes[ssrKey][keyRef.value] = {
+			swrvRes[ssrKey][nanoHex(keyRef.value)] = {
 				data: stateRef.data,
 				error: stateRef.error,
 				isValidating: stateRef.isValidating
@@ -451,7 +450,7 @@ function nanoHex(name: string): string {
 		while (hex.length < 8) {
 			hex = '0' + hex
 		}
-	return hex
+		return hex
 	} catch {
 		console.error("err name: ", name)
 		return '0000'
