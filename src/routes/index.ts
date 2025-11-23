@@ -13,7 +13,7 @@ type RouteData = RouteRecordRaw & {
 const routes: RouteData[] = [
   {
     path: "/",
-    component: () => import("./components/Root"),
+    component: () => import("../components/Root"),
     meta: {
       title: "AnyWeb - support login with google, facebook, github",
       meta: [
@@ -29,7 +29,7 @@ const routes: RouteData[] = [
         path: "",
         name: "Dashboard",
         // redirect: { name: "overview" },
-        component: () => import("./App.vue"),
+        component: () => import("@/components/Layout/Root"),
         meta: {
             title: "Dashboard - AnyWeb",
             meta: [

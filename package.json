@@ -26,6 +26,7 @@
     "@hattip/adapter-node": "^0.0.49",
     "@hiogawa/transforms": "0.1.6",
     "@hiogawa/utils-node": "^0.0.2",
+    "@iconify-json/mdi": "^1.2.3",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "6.0.1",
     "@vitejs/plugin-vue-jsx": "^5.1.1",

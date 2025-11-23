@@ -31,11 +31,14 @@ import {
 	isReadonly,
 	onServerPrefetch,
 	isRef,
-	useSSRContext
+	useSSRContext,
+	type FunctionPlugin,
+	inject
 } from 'vue'
 import webPreset from './lib/web-preset'
 import SWRVCache from './cache'
 import type { IConfig, IKey, IResponse, fetcherFn, revalidateOptions } from './types'
+import { tinyassert } from "@hiogawa/utils";
 
 type StateRef<Data, Error> = {
 	data: Data, error: Error, isValidating: boolean, isLoading: boolean, revalidate: Function, key: any
@@ -161,9 +164,11 @@ function useSWRV<Data = any, Error = any>(
 	config?: IConfig
 ): IResponse<Data, Error>
 function useSWRV<Data = any, Error = any>(...args: any[]): IResponse<Data, Error> {
+	const injectedConfig = inject<Partial<IConfig> | null>('swrv-config', null)
+	tinyassert(injectedConfig, 'Injected swrv-config must be an object')
 	let key: IKey
 	let fn: fetcherFn<Data> | undefined | null
-	let config: IConfig = { ...defaultConfig }
+	let config: IConfig = { ...defaultConfig, ...injectedConfig }
 	let unmounted = false
 	let isHydrated = false
 
@@ -456,6 +461,10 @@ function nanoHex(name: string): string {
 		return '0000'
 	}
 }
-
+export const vueSWR = (swrvConfig: Partial<IConfig> = defaultConfig): FunctionPlugin => (app) => {
+	app.config.globalProperties.$swrv = useSWRV
+	// app.provide('swrv', useSWRV)
+	app.provide('swrv-config', swrvConfig)
+}
 export { mutate }
 export default useSWRV
