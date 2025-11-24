@@ -2,6 +2,7 @@
 import { defineConfig, presetWind4, presetIcons } from "unocss";
 import presetAnimations from "unocss-preset-animations";
 import { presetShadcn } from "unocss-preset-shadcn";
+import { presetBootstrapBtn } from "./plugins/bootstrap_btn";
 
 export default defineConfig({
   presets: [
@@ -10,6 +11,7 @@ export default defineConfig({
     presetIcons({
       extraProperties: { display: "block" },
     }),
+    presetBootstrapBtn(),
     presetShadcn(
       {
         color: "yellow",
